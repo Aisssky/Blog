@@ -28,8 +28,9 @@ interface Props {
 const { post, headings, newer, older } = Astro.props;
 const { title, description, pubDate, updatedDate, cover, subtitle, copyright, toc } = post.data;
 
-const coverUrl = cover ? withBase(cover) : undefined;
-const tocItems = toc ? headings.filter((h) => h.depth === 2 || h.depth === 3) : [];
+const HOME_BG = withBase('/images/background/main.webp');
+const coverUrl = cover ? withBase(cover) : HOME_BG;
+const tocItems = toc ? headings.filter((h) => h.depth >= 2 && h.depth <= 5) : [];
 const dateRange = updatedDate && updatedDate > pubDate
   ? `${formatDate(pubDate)} ~ ${formatDate(updatedDate)}`
   : formatDate(pubDate);

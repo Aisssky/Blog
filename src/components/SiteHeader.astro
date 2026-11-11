@@ -136,4 +136,22 @@ const path = Astro.url.pathname;
       line-height: 1.2;
     }
   }
+
+  /* 仅在游戏库深色页（arcade-page）柔化导航与深色展示区的交界；
+     用 :global 限定 body.arcade-page，不影响其他页面的导航样式 */
+  :global(body.arcade-page) .gh-header {
+    border-bottom-color: transparent;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08), 0 14px 34px -10px rgba(248, 250, 253, 0.28);
+  }
+
+  :global(body.arcade-page) .gh-header::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 48px;
+    background: linear-gradient(to bottom, rgba(248, 250, 253, 0.35), rgba(248, 250, 253, 0));
+    pointer-events: none;
+  }
 </style>

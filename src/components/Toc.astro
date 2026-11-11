@@ -22,6 +22,7 @@ const { headings, label = '📌 索引' } = Astro.props;
         <a
           href={`#${heading.slug}`}
           class={heading.depth >= 3 ? 'sub-link toc-link' : 'toc-link'}
+          style={`padding-left: ${8 + (heading.depth - 2) * 16}px`}
         >
           {heading.text}
         </a>
