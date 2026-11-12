@@ -48,6 +48,17 @@ const categories = collectCategories(posts);
   </div>
 </PageLayout>
 
+{/*
+  站长入口：仅加载极小的引导脚本，动态 import 编辑器控制器。
+  Tiptap / Fabric 等重依赖只有在真正进入编辑模式后才会按需下载，
+  普通访客的阅读体验、加载速度与 SEO 不受影响。
+*/}
+<script>
+  import('../../scripts/editor/owner')
+    .then((m) => m.initEditor())
+    .catch((e) => console.error('[editor] 初始化失败', e));
+</script>
+
 <style>
   /* 和首页 / About 的玻璃面板同款外观，让列表页不再裸贴在背景上 */
   .page-glass {

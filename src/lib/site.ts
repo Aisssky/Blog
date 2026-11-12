@@ -18,7 +18,7 @@ export const SITE = {
   locale: 'zh-CN',
 } as const;
 
-/** BASE_URL 由 Astro 注入，base 为 "/test" 时其值为 "/test/" */
+/** BASE_URL 由 Astro 注入，base 为 "/Blog" 时其值为 "/Blog/" */
 export const BASE = import.meta.env.BASE_URL.replace(/\/+$/, '');
 
 /** 把站内绝对路径拼上 base；外链/协议相对/纯锚点原样返回 */
@@ -35,7 +35,7 @@ export function absoluteUrl(path = '/'): string {
   return new URL(withBase(path), SITE.url).href;
 }
 
-/** 带 base 的站点根地址，例如 https://aisssky.github.io/test */
+/** 带 base 的站点根地址，例如 https://aisssky.github.io/Blog */
 export function siteOrigin(): string {
   return new URL(`${BASE}/`, SITE.url).href.replace(/\/+$/, '');
 }

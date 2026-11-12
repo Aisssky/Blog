@@ -9,7 +9,7 @@ now:
   - { k: "Learning", v: "C++ · Computer Graphics · GAMES101" }
   - { k: "Playing", v: "TODO · 最近在玩什么" }
   - { k: "Reading", v: "TODO · 最近在看什么" }
-  - { k: "Thinking about", v: "到底要不要深造呢…… [择校数据](/test/future/grad-school-data.html)" }
+  - { k: "Thinking about", v: "到底要不要深造呢…… [择校数据](/Blog/future/grad-school-data.html)" }
 ---
 
 # 填写说明

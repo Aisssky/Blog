@@ -4,12 +4,12 @@
 # 两条链路并存：
 #
 #   本地  → local_backend 直读本机文件（写 crypto.randomUUID() 之前先跑这条）
-#           终端 A: npm run dev   →  http://localhost:4321/test/
+#           终端 A: npm run dev   →  http://localhost:4321/Blog/
 #           终端 B: npm run cms   →  本地代理，默认 http://localhost:8081
-#           浏览器打开 http://localhost:4321/test/admin/
+#           浏览器打开 http://localhost:4321/Blog/admin/
 #           CMS 直接读写本机 src/content/blog/*.md 与 public/images/uploads/
 #
-#   线上  → turbo-github → Decap Turbo → GitHub Aisssky/test
+#   线上  → turbo-github → Decap Turbo → GitHub Aisssky/Blog
 #           线上 hostname 不是 localhost，local_backend 自动不生效，无需切换配置
 #
 # 字段必须与 src/content.config.ts 的 schema 保持一致，
@@ -26,7 +26,7 @@ backend:
 
   # 仓库以 Turbo dashboard 里该站点的配置为准；这里保持与之一致即可，
   # 若两边不一致会报 "requested repo does not match"。
-  repo: Aisssky/test
+  repo: Aisssky/Blog
 
   # branch 若显式填写则以这里为准（默认落到 dashboard 的值）
   branch: main
@@ -35,8 +35,8 @@ backend:
 local_backend: true
 
 # 站点地址（用于「查看已发布页面」的预览链接）
-site_url: https://aisssky.github.io/test
-display_url: https://aisssky.github.io/test/
+site_url: https://aisssky.github.io/Blog
+display_url: https://aisssky.github.io/Blog/
 
 # 中文界面
 locale: zh_Hans

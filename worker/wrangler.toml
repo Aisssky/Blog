@@ -1,0 +1,31 @@
+/**
+ * Cloudflare Worker 配置。
+ *
+ * ⚠️ 安全：所有密钥（OAuth Secret / GitHub App 私钥 / Session 密钥）通过
+ *    `wrangler secret put <NAME>` 注入，绝不写进本文件或源码。
+ *    本文件只保留非敏感的 [vars]。
+ *
+ * 部署步骤见交付报告。这里先给出结构占位，真实值由你手动配置。
+ */
+name = "blog-editor-worker"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+workers_dev = true
+
+# 非敏感变量（可提交）
+[vars]
+GH_OWNER = "Aisssky"
+GH_REPO = "Blog"
+GH_BRANCH = "main"
+GH_INSTALLATION_ID = "00000000"          # 替换为你的 GitHub App 安装 ID
+OWNER_GITHUB_LOGIN = "Aisssky"           # 站长白名单，多个用逗号分隔
+COOKIE_NAME = "blog_editor_session"
+SITE_ORIGIN = "https://aisssky.github.io" # 登录后允许回跳的来源（防开放重定向）
+OAUTH_CLIENT_ID = "Ov23liXXXX"           # 替换为 GitHub OAuth App 的 Client ID
+OAUTH_REDIRECT_PATH = "/auth/callback"
+
+# 以下为密钥，必须用 wrangler secret put 注入（不要写在这里）：
+#   GH_APP_ID
+#   GH_APP_PRIVATE_KEY        （PEM 私钥，注意保留换行）
+#   GH_OAUTH_CLIENT_SECRET
+#   SESSION_SECRET            （≥32 字节随机串）

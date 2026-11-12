@@ -43,3 +43,13 @@ const { Content, headings } = await render(post);
   }
   <Content />
 </PostLayout>
+
+{/*
+  绘图二次编辑：仅站长登录后，对 :::drawing 渲染出的 .drawing-embed 显示编辑入口。
+  Fabric 等重依赖按需加载，普通访客不受影响。
+*/}
+<script>
+  import('../../scripts/editor/article-drawings')
+    .then((m) => m.initArticleDrawings())
+    .catch((e) => console.error('[drawings] 初始化失败', e));
+</script>

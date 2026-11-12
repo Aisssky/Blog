@@ -5,13 +5,14 @@ import rehypeRaw from 'rehype-raw';
 import sitemap from '@astrojs/sitemap';
 
 import rehypeBasePrefix from './src/lib/rehype-base-prefix.mjs';
+import remarkDrawing from './src/lib/remark-drawing.mjs';
 
 /**
  * 站点常量集中在这里，改域名 / 子路径只需要改这一处。
  * GitHub Pages 项目页：https://<user>.github.io/<repo>/
  */
 export const SITE_URL = 'https://aisssky.github.io';
-export const BASE_PATH = '/test';
+export const BASE_PATH = '/Blog';
 
 export default defineConfig({
   site: SITE_URL,
@@ -33,6 +34,10 @@ export default defineConfig({
     // Astro 7 起默认换成了 Sätteri 处理器，要挂 rehype 插件必须显式声明
     // 走 @astrojs/markdown-remark 的 unified 处理器。
     processor: unified({
+      remarkPlugins: [
+        // 把正文里的 :::drawing 容器转成展示用 <figure>（data 路径已带 base）
+        [remarkDrawing, { base: BASE_PATH }],
+      ],
       rehypePlugins: [
         // 1) 先把正文里的原始 HTML 块（<img> / <video> / <details> …）
         //    解析成真正的 hast 元素，否则后面的插件看不见它们。
