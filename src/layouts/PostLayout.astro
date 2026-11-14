@@ -70,7 +70,7 @@ const dateRange = updatedDate && updatedDate > pubDate
       </div>
     </nav>
 
-    <div class="content-area">
+    <div class="content-area" data-post={post.id}>
       <slot />
 
       {(newer || older) && (
