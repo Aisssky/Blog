@@ -931,3 +931,48 @@ details.iq .iq-answer ol {
 .diagram-container::-webkit-scrollbar-thumb:hover {
   background: #aaa;
 }
+
+/* ==================== STL 笔记开头引言：文字在左、表情图在右 ==================== */
+.content-area[data-post*="stl-notes"] > blockquote:first-of-type {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  column-gap: 24px;
+  align-items: start;
+}
+
+.content-area[data-post*="stl-notes"] > blockquote:first-of-type > p:first-child {
+  grid-column: 1 / -1;
+  margin-bottom: 10px;
+}
+
+.content-area[data-post*="stl-notes"] > blockquote:first-of-type > p:nth-child(2) {
+  grid-column: 1;
+  grid-row: 2;
+  margin-bottom: 0;
+}
+
+.content-area[data-post*="stl-notes"] > blockquote:first-of-type > p:nth-child(3) {
+  grid-column: 2;
+  grid-row: 2;
+  margin: 0;
+}
+
+.content-area[data-post*="stl-notes"] > blockquote:first-of-type > p:nth-child(3) img {
+  width: 180px;
+  height: auto;
+  border-radius: 6px;
+}
+
+@media (max-width: 600px) {
+  .content-area[data-post*="stl-notes"] > blockquote:first-of-type {
+    display: block;
+  }
+
+  .content-area[data-post*="stl-notes"] > blockquote:first-of-type > p:nth-child(3) {
+    margin-top: 12px;
+  }
+
+  .content-area[data-post*="stl-notes"] > blockquote:first-of-type > p:nth-child(3) img {
+    width: 140px;
+  }
+}
