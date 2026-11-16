@@ -2,6 +2,8 @@
 import { defineConfig } from 'astro/config';
 import { unified } from '@astrojs/markdown-remark';
 import rehypeRaw from 'rehype-raw';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import sitemap from '@astrojs/sitemap';
 
 import rehypeBasePrefix from './src/lib/rehype-base-prefix.mjs';
@@ -35,6 +37,8 @@ export default defineConfig({
     // 走 @astrojs/markdown-remark 的 unified 处理器。
     processor: unified({
       remarkPlugins: [
+        // 把 $...$ 解析成 math 节点，构建时交给 rehype-katex 渲染成静态 HTML
+        remarkMath,
         // 把正文里的 :::drawing 容器转成展示用 <figure>（data 路径已带 base）
         [remarkDrawing, { base: BASE_PATH }],
       ],
@@ -42,7 +46,9 @@ export default defineConfig({
         // 1) 先把正文里的原始 HTML 块（<img> / <video> / <details> …）
         //    解析成真正的 hast 元素，否则后面的插件看不见它们。
         rehypeRaw,
-        // 2) 把正文里以 "/" 开头的图片/链接补上 base 前缀（/test）
+        // 2) math 节点 → KaTeX HTML，访客不需要加载任何公式渲染脚本
+        rehypeKatex,
+        // 3) 把正文里以 "/" 开头的图片/链接补上 base 前缀（/test）
         [rehypeBasePrefix, { base: BASE_PATH }],
       ],
     }),

@@ -976,3 +976,10 @@ details.iq .iq-answer ol {
     width: 140px;
   }
 }
+
+/* KaTeX 行内公式：窄屏下别把括号和矩阵内容拆到不同行，桌面保持默认紧凑排版 */
+@media (max-width: 600px) {
+  .content-area .katex {
+    white-space: nowrap;
+  }
+}

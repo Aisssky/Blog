@@ -1,6 +1,7 @@
 ---
 title: UE5网络同步
 pubDate: 2026-08-19
+description: UE5 网络同步笔记：Actor 复制与复制系统、RPC、网络模式与本地/联网多人，以及 Listen Server 与 Dedicated Server 两种服务器类型。
 ---
 
 ## **复制**
