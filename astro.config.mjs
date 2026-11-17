@@ -5,6 +5,7 @@ import rehypeRaw from 'rehype-raw';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import sitemap from '@astrojs/sitemap';
+import mdx from '@astrojs/mdx';
 
 import rehypeBasePrefix from './src/lib/rehype-base-prefix.mjs';
 import remarkDrawing from './src/lib/remark-drawing.mjs';
@@ -23,6 +24,9 @@ export default defineConfig({
   integrations: [
     // 生成 sitemap-index.xml / sitemap-0.xml，自动带上 base 前缀
     sitemap({ changefreq: 'weekly', priority: 0.7, lastmod: new Date() }),
+    // 文章里要嵌 Astro 组件（如设计模式速查表）时用 .mdx，
+    // 普通 .md 仍走纯 Markdown，两者共用同一套 remark/rehype 插件。
+    mdx(),
   ],
 
   // 目录式输出：/blog/hello/ 而不是 /blog/hello.html，和旧站 URL 习惯一致

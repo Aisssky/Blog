@@ -69,7 +69,7 @@ const currently = [
                       {post.data.description && (
                         <span class="entry-desc">{post.data.description}</span>
                       )}
-                      {(post.data.category || post.data.tags?.length) && (
+                      {(post.data.category || post.data.tags.length > 0) && (
                         <span class="entry-tags">
                           {post.data.category}
                           {post.data.category && post.data.tags?.length ? ' · ' : ''}

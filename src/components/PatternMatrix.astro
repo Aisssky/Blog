@@ -1,0 +1,464 @@
+---
+/**
+ * 设计模式速查表。
+ *
+ * 一行一个模式，五列：名称 / 结构图 / 组成部分 / 例题 1 / 例题 2。
+ * 数据全部来自 src/data/design-patterns-matrix.ts，改内容不用动这个文件。
+ * 表格可手动缩放（−/＋/适应宽度/重置），窄屏靠缩放 + 横向滚动看全表。
+ */
+import { PATTERN_ROWS } from '../data/design-patterns-matrix';
+import { withBase } from '../lib/site';
+
+const rows = PATTERN_ROWS;
+const EX_COUNT = 2;
+---
+
+<div class="pattern-matrix">
+  <div class="matrix-tools">
+    <span class="tools-label">缩放</span>
+    <button type="button" class="tool-btn" data-zoom="out" aria-label="缩小">−</button>
+    <span class="zoom-level" aria-live="polite">100%</span>
+    <button type="button" class="tool-btn" data-zoom="in" aria-label="放大">＋</button>
+    <button type="button" class="tool-btn tool-btn--wide" data-zoom="fit">适应宽度</button>
+    <button type="button" class="tool-btn tool-btn--wide" data-zoom="reset">↺ 重置</button>
+  </div>
+
+  <div class="matrix-scroll">
+    <div class="matrix-zoom">
+      <table>
+        <thead>
+          <tr>
+            <th class="cell-name" scope="col">模式</th>
+            <th class="cell-figure" scope="col">结构图</th>
+            <th class="cell-parts" scope="col">组成部分</th>
+            <th class="cell-ex" scope="col">例题 1</th>
+            <th class="cell-ex" scope="col">例题 2</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            rows.map((row) => (
+              <tr id={row.id}>
+                <th class="cell-name" scope="row">
+                  {row.name ? <span class="pt-name">{row.name}</span> : <span class="pt-todo">待补</span>}
+                  {row.en && <span class="pt-en">{row.en}</span>}
+                  {row.category && <span class="pt-cat">{row.category}</span>}
+                </th>
+
+                <td class="cell-figure" data-label="结构图">
+                  {row.structure ? (
+                    <a
+                      class="pt-figure"
+                      href={withBase(row.structure.src)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src={withBase(row.structure.src)}
+                        alt={row.structure.alt ?? `${row.name || '模式'}结构图`}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </a>
+                  ) : (
+                    <span class="pt-todo">待补</span>
+                  )}
+                  {row.structure?.caption && <span class="pt-cap">{row.structure.caption}</span>}
+                </td>
+
+                <td class="cell-parts" data-label="组成部分">
+                  {row.parts?.length ? (
+                    <ul>
+                      {row.parts.map((part) => (
+                        <li>{part}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span class="pt-todo">待补</span>
+                  )}
+                </td>
+
+                {Array.from({ length: EX_COUNT }, (_, i) => {
+                  const example = row.examples?.[i];
+                  return (
+                    <td class="cell-ex" data-label={`例题 ${i + 1}`}>
+                      {example ? (
+                        <>
+                          <span class="ex-title">{example.title}</span>
+                          {example.note && <span class="ex-note">{example.note}</span>}
+                          {example.image && (
+                            <img
+                              src={withBase(example.image)}
+                              alt={`${row.name || '模式'} 例题 ${i + 1}：${example.title}`}
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          )}
+                        </>
+                      ) : (
+                        <span class="pt-todo">待补</span>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const MIN = 0.3;
+    const MAX = 2;
+    const STEP = 0.1;
+    const KEY = 'pattern-matrix-zoom';
+
+    document.querySelectorAll('.pattern-matrix').forEach(function (root) {
+      const scroller = root.querySelector('.matrix-scroll');
+      const box = root.querySelector('.matrix-zoom');
+      const level = root.querySelector('.zoom-level');
+      if (!scroller || !box || !level) return;
+
+      let zoom = 1;
+      try {
+        const saved = Number.parseFloat(localStorage.getItem(KEY) || '');
+        if (Number.isFinite(saved) && saved >= MIN && saved <= MAX) zoom = saved;
+      } catch (e) {
+        /* 隐私模式下 localStorage 会抛错，忽略 */
+      }
+
+      function render() {
+        box.style.zoom = String(zoom);
+        level.textContent = Math.round(zoom * 100) + '%';
+      }
+
+      function setZoom(next) {
+        const clamped = Math.max(MIN, Math.min(MAX, Math.round(next * 100) / 100));
+        if (clamped === zoom) return;
+        const before = scroller.scrollWidth - scroller.clientWidth;
+        const ratio = before > 0 ? scroller.scrollLeft / before : 0;
+        zoom = clamped;
+        render();
+        try {
+          localStorage.setItem(KEY, String(zoom));
+        } catch (e) {
+          /* 同上 */
+        }
+        const after = scroller.scrollWidth - scroller.clientWidth;
+        if (after > 0) scroller.scrollLeft = ratio * after;
+      }
+
+      function fitToWidth() {
+        const saved = zoom;
+        zoom = 1;
+        render();
+        const natural = box.scrollWidth;
+        zoom = saved;
+        if (natural <= scroller.clientWidth) {
+          setZoom(1);
+          return;
+        }
+        /* 向下取整到 2 位，留 1px 余量，避免四舍五入后差一点点又冒出滚动条 */
+        setZoom(Math.floor(((scroller.clientWidth - 1) / natural) * 100) / 100);
+      }
+
+      root.querySelectorAll('[data-zoom]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const act = btn.dataset.zoom;
+          if (act === 'in') setZoom(zoom + STEP);
+          else if (act === 'out') setZoom(zoom - STEP);
+          else if (act === 'reset') setZoom(1);
+          else if (act === 'fit') fitToWidth();
+        });
+      });
+
+      render();
+    });
+  })();
+</script>
+
+<style>
+  .pattern-matrix {
+    margin: 20px 0 26px;
+  }
+
+  /* ==================== 缩放工具条 ==================== */
+  .matrix-tools {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+    font-size: 12.5px;
+    color: #999;
+  }
+
+  .tools-label {
+    margin-right: 2px;
+  }
+
+  .tool-btn {
+    min-width: 26px;
+    height: 26px;
+    padding: 0 8px;
+    border: 1px solid #e5e5e5;
+    border-radius: 7px;
+    background: #fff;
+    color: #555;
+    font-size: 12.5px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .tool-btn:hover {
+    background: #fdf5f8;
+    border-color: #e8c4d4;
+    color: #c2185b;
+  }
+
+  .tool-btn:active {
+    transform: translateY(1px);
+  }
+
+  .tool-btn--wide {
+    padding: 0 10px;
+  }
+
+  .zoom-level {
+    min-width: 42px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    color: #666;
+  }
+
+  /* ==================== 表格 ==================== */
+  .matrix-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border, #e5e5e5);
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  .matrix-zoom {
+    display: block;
+    transform-origin: top left;
+  }
+
+  /* 正文 .content-area table 是 display:block + 自身滚动，
+     这里要还原成真表格，把滚动交给外层容器 */
+  .pattern-matrix table {
+    display: table;
+    width: 100%;
+    min-width: 912px;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0;
+    font-size: 13.5px;
+    overflow: visible;
+  }
+
+  .pattern-matrix th,
+  .pattern-matrix td {
+    border: none;
+    border-bottom: 1px solid #efefef;
+    border-right: 1px solid #f2f2f2;
+    padding: 12px 14px;
+    vertical-align: top;
+    text-align: left;
+    background: #fff;
+  }
+
+  .pattern-matrix th:last-child,
+  .pattern-matrix td:last-child {
+    border-right: none;
+  }
+
+  .pattern-matrix tbody tr:last-child th,
+  .pattern-matrix tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .pattern-matrix thead th {
+    background: #fafafa;
+    font-weight: 600;
+    color: #666;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  /* 首列吸左，横向滚动时不跟着跑 */
+  .pattern-matrix .cell-name {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    width: 116px;
+    min-width: 116px;
+    background: #fff;
+    border-right: 1px solid #e5e5e5;
+  }
+
+  .pattern-matrix thead .cell-name {
+    z-index: 3;
+    background: #fafafa;
+  }
+
+  .pattern-matrix tbody tr:hover .cell-name {
+    background: #fcf7f9;
+  }
+
+  .pt-name {
+    display: block;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #222;
+    line-height: 1.4;
+  }
+
+  .pt-en {
+    display: block;
+    margin-top: 3px;
+    font-size: 11.5px;
+    color: #aaa;
+    letter-spacing: 0.01em;
+  }
+
+  .pt-cat {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: #f7eef2;
+    color: #b0426c;
+    font-size: 11px;
+  }
+
+  .cell-figure {
+    width: 190px;
+    min-width: 190px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .pt-figure {
+    display: block;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .pt-figure img {
+    width: 100%;
+    max-width: 170px;
+    height: auto;
+    margin: 0;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .pt-cap {
+    display: block;
+    margin-top: 6px;
+    font-size: 11.5px;
+    color: #999;
+  }
+
+  .cell-parts {
+    width: 210px;
+    min-width: 196px;
+  }
+
+  .cell-parts ul {
+    margin: 0;
+    padding-left: 16px;
+    list-style: disc;
+  }
+
+  .cell-parts li {
+    margin: 0 0 4px;
+    font-size: 13px;
+    line-height: 1.65;
+    color: #444;
+  }
+
+  .cell-parts li:last-child {
+    margin-bottom: 0;
+  }
+
+  .cell-ex {
+    min-width: 190px;
+  }
+
+  .ex-title {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.5;
+  }
+
+  .ex-note {
+    display: block;
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: #777;
+    line-height: 1.65;
+  }
+
+  .cell-ex img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    margin: 8px 0 0;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .pt-todo {
+    display: inline-block;
+    padding: 1px 8px;
+    border: 1px dashed #ddd;
+    border-radius: 999px;
+    color: #bbb;
+    font-size: 12px;
+  }
+
+  @media (max-width: 760px) {
+    .pattern-matrix th,
+    .pattern-matrix td {
+      padding: 10px 12px;
+    }
+
+    .matrix-tools {
+      font-size: 12px;
+    }
+
+    .tool-btn {
+      height: 28px;
+    }
+  }
+
+  @media print {
+    .matrix-tools {
+      display: none;
+    }
+
+    .matrix-scroll {
+      overflow: visible;
+      border: none;
+    }
+
+    .pattern-matrix table {
+      min-width: 0;
+      font-size: 10.5px;
+    }
+
+    .pattern-matrix img {
+      max-width: 110px;
+    }
+  }
+</style>
