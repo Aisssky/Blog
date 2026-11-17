@@ -1,18 +1,28 @@
 ---
 /**
- * 文章元信息：日期 / 分类 / 标签。
+ * 文章元信息：日期 / 一级分区 / 二级分类 / 标签。
+ *
+ * 分类显示名与链接都从 taxonomy 解析（slug → 中文名、分区归属），
+ * 旧中文 category（如「问题记录」）会经 alias 归一化后正确显示。
+ * 详情页侧栏不显示分区（showSection 默认关闭），保持原有观感。
  */
 import type { CollectionEntry } from 'astro:content';
-import { categoryPath, formatDate, tagPath } from '../lib/site';
+import { categoryPagePath, categoryPath, formatDate, sectionPath, tagPath } from '../lib/site';
+import { findCategory, findSection } from '../lib/taxonomy';
 
 interface Props {
   post: CollectionEntry<'blog'>;
   showTags?: boolean;
   showCategory?: boolean;
+  showSection?: boolean;
 }
 
-const { post, showTags = true, showCategory = true } = Astro.props;
-const { pubDate, updatedDate, category, tags } = post.data;
+const { post, showTags = true, showCategory = true, showSection = false } = Astro.props;
+const { pubDate, updatedDate, category, tags, section } = post.data;
+
+const catObj = findCategory(category);
+const secObj = findSection(section) ?? catObj?.section;
+const categoryName = catObj?.category.name ?? category;
 ---
 
 <div class="post-meta">
@@ -28,12 +38,31 @@ const { pubDate, updatedDate, category, tags } = post.data;
   }
 
   {
-    showCategory && category && (
+    showSection && secObj && (
       <>
         <span class="sep">·</span>
-        <a class="chip chip-cat" href={categoryPath(category)}>
-          {category}
+        <a class="chip chip-section" href={sectionPath(secObj.id)}>
+          {secObj.name}
         </a>
+      </>
+    )
+  }
+
+  {
+    showCategory && categoryName && (
+      <>
+        <span class="sep">·</span>
+        {
+          catObj ? (
+            <a class="chip chip-cat" href={categoryPagePath(catObj.section.id, catObj.category.id)}>
+              {categoryName}
+            </a>
+          ) : (
+            <a class="chip chip-cat" href={categoryPath(category!)}>
+              {categoryName}
+            </a>
+          )
+        }
       </>
     )
   }

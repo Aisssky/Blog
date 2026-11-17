@@ -2,6 +2,8 @@
 title: 设计模式
 pubDate: 2026-11-11
 description: 大钊 insideUE4 与李建忠 C++ 设计模式课程学习笔记——UML 类图、面向对象设计原则，以及 GOF-23 各模式的动机、结构与总结。
+section: courses
+category: design-patterns
 tags: ['设计模式', 'C++', '学习笔记']
 ---
 > 这个部分在大二下看大钊老师的insideUE4的时候就已经了解了几种常见的设计模式（已经做了很多玩具项目却没有了解过设计模式，只知道解耦MVC等，感到非常惭愧\-\_\-

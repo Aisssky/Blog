@@ -215,6 +215,18 @@
   color: #fff;
 }
 
+/* 一级分区徽章：主题蓝，区别于分类（粉）与标签（灰蓝） */
+.chip-section {
+  background: rgba(98, 137, 199, 0.12);
+  color: #426faf;
+  border-color: rgba(98, 137, 199, 0.28);
+}
+
+.chip-section:hover {
+  background: #426faf;
+  color: #fff;
+}
+
 .chip-list {
   display: flex;
   flex-wrap: wrap;

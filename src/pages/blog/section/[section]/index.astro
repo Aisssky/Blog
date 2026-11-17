@@ -1,0 +1,64 @@
+---
+/**
+ * Writing 一级分区页 /blog/section/[section]/
+ * 展示分区介绍 + 二级分类入口 + 该分区全部文章。
+ */
+import PageLayout from '../../../../components/PageLayout.astro';
+import PostCard from '../../../../components/PostCard.astro';
+import { getPublishedPosts } from '../../../../lib/posts';
+import { SECTIONS } from '../../../../data/sections';
+import { findSection, activeCategories, resolveSectionId, resolveCategoryId } from '../../../../lib/taxonomy';
+import { categoryPagePath, withBase } from '../../../../lib/site';
+import '../../../../styles/writing.css';
+
+export async function getStaticPaths() {
+  return SECTIONS.map((section) => ({ params: { section: section.id } }));
+}
+
+const { section: sectionId } = Astro.params;
+const section = findSection(sectionId);
+if (!section) return Astro.redirect(withBase('/blog/'));
+
+const posts = (await getPublishedPosts()).filter((p) => resolveSectionId(p) === section.id);
+
+/** 该分区下有文章的分类 */
+const categories = activeCategories(posts);
+const catCount = (id: string) => posts.filter((p) => resolveCategoryId(p) === id).length;
+---
+
+<PageLayout
+  title={section.name}
+  description={section.description}
+  subtitle={section.description}
+>
+  <nav class="breadcrumb" aria-label="面包屑">
+    <a href={withBase('/blog/')}>Writing</a>
+    <span class="sep">/</span>
+    <span class="current">{section.name}</span>
+  </nav>
+
+  {
+    categories.length > 0 && (
+      <div class="cat-list">
+        {categories.map((category) => (
+          <a class="cat-chip" href={categoryPagePath(section.id, category.id)}>
+            {category.name}
+            <span class="n">{catCount(category.id)}</span>
+          </a>
+        ))}
+      </div>
+    )
+  }
+
+  {
+    posts.length > 0 ? (
+      <section class="writing-panel">
+        <ul class="post-list">
+          {posts.map((post) => <PostCard post={post} />)}
+        </ul>
+      </section>
+    ) : (
+      <div class="writing-empty">这个分区还没有文章。</div>
+    )
+  }
+</PageLayout>

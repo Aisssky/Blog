@@ -1,0 +1,70 @@
+---
+/**
+ * Writing 二级分类页 /blog/section/[section]/[category]/
+ * 只生成「有已发布文章」的分类，展示面包屑 + 分类说明 + 文章列表。
+ */
+import PageLayout from '../../../../components/PageLayout.astro';
+import PostCard from '../../../../components/PostCard.astro';
+import { getPublishedPosts } from '../../../../lib/posts';
+import { SECTIONS } from '../../../../data/sections';
+import { findSection, findCategory, resolveSectionId, resolveCategoryId } from '../../../../lib/taxonomy';
+import { sectionPath, withBase } from '../../../../lib/site';
+import '../../../../styles/writing.css';
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  const paths: { params: { section: string; category: string } }[] = [];
+  for (const section of SECTIONS) {
+    for (const category of section.categories) {
+      const has = posts.some(
+        (p) => resolveSectionId(p) === section.id && resolveCategoryId(p) === category.id
+      );
+      if (has) paths.push({ params: { section: section.id, category: category.id } });
+    }
+  }
+  return paths;
+}
+
+const { section: sectionId, category: categoryId } = Astro.params;
+const found = findCategory(categoryId);
+const section = found?.section ?? findSection(sectionId);
+const category = found?.category;
+
+// 非法 section / category 组合：退回 Writing 首页
+if (!section || !category) return Astro.redirect(withBase('/blog/'));
+
+const posts = (await getPublishedPosts()).filter(
+  (p) => resolveSectionId(p) === section.id && resolveCategoryId(p) === category.id
+);
+---
+
+<PageLayout
+  title={category.name}
+  description={category.description ?? `${section.name} · ${category.name}`}
+  subtitle={category.description ?? `${section.name}分类下的文章`}
+>
+  <nav class="breadcrumb" aria-label="面包屑">
+    <a href={withBase('/blog/')}>Writing</a>
+    <span class="sep">/</span>
+    <a href={sectionPath(section.id)}>{section.name}</a>
+    <span class="sep">/</span>
+    <span class="current">{category.name}</span>
+  </nav>
+
+  <p class="cat-count">共 {posts.length} 篇</p>
+
+  <section class="writing-panel">
+    <ul class="post-list">
+      {posts.map((post) => <PostCard post={post} />)}
+    </ul>
+  </section>
+</PageLayout>
+
+<style>
+  .cat-count {
+    font-family: var(--ff-sans);
+    font-size: 12px;
+    color: var(--c-text-faint);
+    margin: -14px 0 20px;
+  }
+</style>

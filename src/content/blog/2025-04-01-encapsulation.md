@@ -2,6 +2,8 @@
 title: 面向对象·上·封装
 pubDate: 2025-04-01
 description: C++ 面向对象封装部分笔记：访问权限、构造与析构、深浅拷贝、静态成员、this 指针、友元、运算符重载，以及 const 与引用传参的常见用法。
+section: programming
+category: cpp
 ---
 
 > 将属性和行为作为一个整体，表现生活中的事物

@@ -31,8 +31,11 @@ const blog = defineCollection({
     /** 标签 */
     tags: z.array(z.string()).default([]),
 
-    /** 分类（单值） */
+    /** 分类（单值）：Writing 的二级分类 id，见 src/data/sections.ts */
     category: z.string().optional(),
+
+    /** 一级分区（programming / courses / engineering / thoughts），见 src/data/sections.ts */
+    section: z.string().optional(),
 
     /** 封面图，正文头图也会用它 */
     cover: z.string().optional(),

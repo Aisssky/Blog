@@ -2,6 +2,8 @@
 title: UMG入门学习
 pubDate: 2025-07-11
 description: UMG 入门笔记：从 UMG 与 Slate 的区别、按钮与状态栏控件，到角色蓝图变量绑定、物品栏与物品说明文字的实现。
+section: engineering
+category: ue-basics
 ---
 
 # 本文仅用于了解，学习基础的功能实现。

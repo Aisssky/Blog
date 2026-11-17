@@ -50,6 +50,16 @@ export function categoryPath(name: string): string {
   return withBase(`/categories/${encodeURIComponent(name)}/`);
 }
 
+/** Writing 一级分区页路径 */
+export function sectionPath(sectionId: string): string {
+  return withBase(`/blog/section/${sectionId}/`);
+}
+
+/** Writing 二级分类页路径 */
+export function categoryPagePath(sectionId: string, categoryId: string): string {
+  return withBase(`/blog/section/${sectionId}/${categoryId}/`);
+}
+
 /** 标签页路径 */
 export function tagPath(name: string): string {
   return withBase(`/tags/${encodeURIComponent(name)}/`);

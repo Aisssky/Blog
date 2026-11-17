@@ -2,6 +2,8 @@
 pubDate: 2026-11-09
 title: 我与 EvoMeme：盛趣「代号 Meme」AI 游戏实践手记
 description: 从刷到招募帖到 8 周做出 18 个 AI 小游戏，记录我在盛趣「代号 Meme」线上实践里的完整 0 到 1 经历。
+section: engineering
+category: devlog
 tags: [游戏开发, AI, 盛趣, 实践经历]
 cover: /images/arcade/subway.webp
 ---

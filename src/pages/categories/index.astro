@@ -5,9 +5,13 @@
 import PageLayout from '../../components/PageLayout.astro';
 import { collectCategories, getPublishedPosts } from '../../lib/posts';
 import { categoryPath } from '../../lib/site';
+import { findCategory } from '../../lib/taxonomy';
 
 const posts = await getPublishedPosts();
-const categories = collectCategories(posts);
+const categories = collectCategories(posts).map((c) => ({
+  ...c,
+  display: findCategory(c.name)?.category.name ?? c.name,
+}));
 ---
 
 <PageLayout
@@ -20,7 +24,7 @@ const categories = collectCategories(posts);
       <div class="chip-list">
         {categories.map((category) => (
           <a class="chip chip-cat chip-lg" href={categoryPath(category.name)}>
-            {category.name} · {category.count}
+            {category.display} · {category.count}
           </a>
         ))}
       </div>

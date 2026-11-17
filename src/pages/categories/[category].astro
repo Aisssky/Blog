@@ -1,10 +1,14 @@
 ---
 /**
  * 某个分类下的文章 /categories/<分类>/
+ *
+ * 兼容层：category 字段已迁移为二级分类 slug，这里用 taxonomy 把
+ * slug / 旧中文值统一解析成显示名，并按分类 id 匹配文章。
  */
 import PageLayout from '../../components/PageLayout.astro';
 import PostCard from '../../components/PostCard.astro';
 import { collectCategories, getPublishedPosts } from '../../lib/posts';
+import { findCategory, resolveCategoryId } from '../../lib/taxonomy';
 import { withBase } from '../../lib/site';
 
 export async function getStaticPaths() {
@@ -16,13 +20,16 @@ export async function getStaticPaths() {
 }
 
 const { name } = Astro.props;
-const posts = (await getPublishedPosts()).filter((post) => post.data.category === name);
+const displayName = findCategory(name)?.category.name ?? name;
+const posts = (await getPublishedPosts()).filter(
+  (post) => resolveCategoryId(post) === name || post.data.category === name
+);
 ---
 
 <PageLayout
-  title={`分类 · ${name}`}
-  description={`分类「${name}」下的全部文章，共 ${posts.length} 篇`}
-  subtitle={`${name} · 共 ${posts.length} 篇`}
+  title={`分类 · ${displayName}`}
+  description={`分类「${displayName}」下的全部文章，共 ${posts.length} 篇`}
+  subtitle={`${displayName} · 共 ${posts.length} 篇`}
 >
   <p style="margin:-16px 0 28px;">
     <a href={withBase('/categories/')} style="color:#c2185b;font-size:14px;text-decoration:none;">

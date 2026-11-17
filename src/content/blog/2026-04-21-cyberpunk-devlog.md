@@ -10,7 +10,9 @@ updatedDate: 2026-05-10
 
 subtitle: "开发日志 · 2026-04-21 ~ 2026-05-10"
 
-category: "项目日志"
+section: engineering
+
+category: devlog
 
 tags:
 

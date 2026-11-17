@@ -1,50 +1,96 @@
 ---
 /**
- * 文章列表页 /blog/
+ * Writing 首页 /blog/
+ *
+ * 信息架构入口：四个一级分区卡片 + 最近更新（跨越全部分区）+ 侧栏（分类 / 标签云）。
  */
 import PageLayout from '../../components/PageLayout.astro';
 import PostCard from '../../components/PostCard.astro';
-import { collectCategories, getPublishedPosts } from '../../lib/posts';
-import { categoryPath, withBase } from '../../lib/site';
+import SectionCard from '../../components/SectionCard.astro';
+import { getPublishedPosts, collectTags } from '../../lib/posts';
+import { SECTIONS } from '../../data/sections';
+import { groupBySection, activeCategories } from '../../lib/taxonomy';
+import { sectionPath, tagPath, withBase } from '../../lib/site';
+import '../../styles/writing.css';
 
 const posts = await getPublishedPosts();
-const categories = collectCategories(posts);
+
+/** 分区 id → 该分区文章，用于卡片标签和侧栏计数 */
+const bySection = new Map(groupBySection(posts).map((g) => [g.section.id, g.posts]));
+
+const tags = collectTags(posts);
+
+/** 最近更新：取最新 8 篇，跨全部分区 */
+const RECENT_COUNT = 8;
+const recent = posts.slice(0, RECENT_COUNT);
 ---
 
 <PageLayout
-  title="笔记"
-  description="Aisssky 的技术笔记：UE5 / C++ / 图形学 / 项目开发日志"
+  title="Writing"
+  description="知识整理、工程实践与个人记录。"
+  subtitle="知识整理、工程实践与个人记录。"
 >
-  <div class="page-glass">
+  <!-- 一级分区入口 -->
+  <div class="writing-grid">
     {
-      categories.length > 0 && (
-        <div class="chip-list" style="margin-bottom: 28px;">
-          <a class="chip chip-cat chip-lg" href={withBase('/categories/')}>
-            全部分类 →
-          </a>
-          {categories.map((category) => (
-            <a class="chip chip-tag chip-lg" href={categoryPath(category.name)}>
-              {category.name} · {category.count}
-            </a>
-          ))}
-        </div>
-      )
+      SECTIONS.map((section, i) => {
+        const bucket = bySection.get(section.id) ?? [];
+        return <SectionCard section={section} index={i} categories={activeCategories(bucket)} />;
+      })
     }
+  </div>
 
-    {
-      posts.length > 0 ? (
-        <ul class="post-list">
-          {posts.map((post) => (
-            <PostCard post={post} />
-          ))}
-        </ul>
-      ) : (
-        <div class="empty">
-          还没有文章。打开 <code>/admin/</code> 新建一篇，或者直接往
-          <code>src/content/blog/</code> 里放一个 <code>.md</code> 文件。
+  <div class="writing-layout">
+    <div class="writing-main">
+      <!-- 最近更新：跨全部分区 -->
+      <section class="writing-panel">
+        <div class="writing-panel-head">
+          <h2 class="writing-panel-title">最近更新</h2>
+          <a class="writing-view-all" href={withBase('/blog/all/')}>查看全部 →</a>
         </div>
-      )
-    }
+
+        {
+          recent.length > 0 ? (
+            <ul class="post-list">
+              {recent.map((post) => <PostCard post={post} />)}
+            </ul>
+          ) : (
+            <div class="writing-empty">还没有文章。</div>
+          )
+        }
+      </section>
+    </div>
+
+    <aside class="writing-side">
+      <!-- 文章分类：四个一级分区 -->
+      <section class="writing-panel">
+        <h2 class="writing-panel-title">文章分类</h2>
+        <div class="section-links">
+          {
+            SECTIONS.map((section) => (
+              <a class="section-link" href={sectionPath(section.id)}>
+                <span>{section.name}</span>
+                <span class="count">{bySection.get(section.id)?.length ?? 0}</span>
+              </a>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- 标签云 -->
+      {
+        tags.length > 0 && (
+          <section class="writing-panel">
+            <h2 class="writing-panel-title">标签</h2>
+            <div class="tag-cloud">
+              {tags.map((tag) => (
+                <a class="tag-chip" href={tagPath(tag.name)}>#{tag.name}</a>
+              ))}
+            </div>
+          </section>
+        )
+      }
+    </aside>
   </div>
 </PageLayout>
 
@@ -58,34 +104,3 @@ const categories = collectCategories(posts);
     .then((m) => m.initEditor())
     .catch((e) => console.error('[editor] 初始化失败', e));
 </script>
-
-<style>
-  /* 和首页 / About 的玻璃面板同款外观，让列表页不再裸贴在背景上 */
-  .page-glass {
-    background: var(--c-glass);
-    backdrop-filter: blur(18px) saturate(120%);
-    -webkit-backdrop-filter: blur(18px) saturate(120%);
-    border: 1px solid var(--c-border);
-    border-radius: var(--radius);
-    padding: 26px 28px;
-  }
-
-  /* 卡片本身已是白底，套在玻璃里时去掉各自的边框，避免双重描边 */
-  .page-glass :global(.post-card) {
-    background: transparent;
-    border: none;
-    border-top: 1px solid var(--c-border-soft);
-    border-radius: 0;
-    padding: 20px 4px;
-  }
-
-  .page-glass :global(.post-card:first-child) {
-    border-top: none;
-  }
-
-  @media (max-width: 720px) {
-    .page-glass {
-      padding: 20px 16px;
-    }
-  }
-</style>

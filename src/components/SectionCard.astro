@@ -1,0 +1,202 @@
+---
+/**
+ * Writing 首页的一级分区入口卡片。
+ *
+ * 整卡是一个 <a>（无嵌套链接），图标 / 序号 / 名称 / 描述 / 分类标签 / 箭头。
+ * 标签只放「当前有文章」的二级分类，空分区显示「暂无内容」。
+ */
+import type { TaxonomySection, TaxonomyCategory } from '../data/sections';
+import { sectionPath } from '../lib/site';
+
+interface Props {
+  section: TaxonomySection;
+  /** 0 起始的序号，展示为 01 / 02 / 03 / 04 */
+  index: number;
+  /** 该分区下有已发布文章的分类（用于底部标签） */
+  categories?: TaxonomyCategory[];
+}
+
+const { section, index, categories = [] } = Astro.props;
+const num = String(index + 1).padStart(2, '0');
+const tags = categories.slice(0, 4).map((c) => c.name);
+---
+
+<a class="section-card" href={sectionPath(section.id)}>
+  <span class="sc-icon" aria-hidden="true">
+    {
+      section.icon === 'code' && (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6" />
+          <polyline points="8 6 2 12 8 18" />
+        </svg>
+      )
+    }
+    {
+      section.icon === 'course' && (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+        </svg>
+      )
+    }
+    {
+      section.icon === 'cube' && (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+          <line x1="12" y1="22.08" x2="12" y2="12" />
+        </svg>
+      )
+    }
+    {
+      section.icon === 'feather' && (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" />
+          <line x1="16" y1="8" x2="2" y2="22" />
+          <line x1="17.5" y1="15" x2="9" y2="15" />
+        </svg>
+      )
+    }
+  </span>
+
+  <span class="sc-arrow" aria-hidden="true">→</span>
+
+  <h3 class="sc-title">
+    <span class="sc-num">{num}</span>
+    {section.name}
+  </h3>
+  <p class="sc-eng">{section.english}</p>
+  <p class="sc-desc">{section.description}</p>
+
+  {
+    tags.length > 0 ? (
+      <div class="sc-tags">
+        {tags.map((t) => (
+          <span class="sc-tag">{t}</span>
+        ))}
+      </div>
+    ) : (
+      <div class="sc-empty">暂无内容</div>
+    )
+  }
+</a>
+
+<style>
+  .section-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: 22px 22px 20px;
+    background: var(--c-glass-strong);
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .section-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(98, 137, 199, 0.5);
+    box-shadow: 0 12px 28px -14px rgba(98, 137, 199, 0.45);
+  }
+
+  .sc-icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: rgba(98, 137, 199, 0.12);
+    color: var(--c-accent-hover);
+    margin-bottom: 14px;
+  }
+
+  .sc-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .sc-arrow {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(98, 137, 199, 0.1);
+    color: var(--c-accent);
+    font-size: 14px;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+
+  .section-card:hover .sc-arrow {
+    background: var(--c-accent);
+    color: #fff;
+    transform: translateX(3px);
+  }
+
+  .sc-title {
+    font-family: var(--ff-sans);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--c-text);
+    margin: 0 0 2px;
+    letter-spacing: 0.01em;
+  }
+
+  .sc-num {
+    color: var(--c-text-faint);
+    font-weight: 500;
+    margin-right: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sc-eng {
+    font-family: var(--ff-sans);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-text-faint);
+    margin: 0 0 10px;
+  }
+
+  .sc-desc {
+    font-family: var(--ff-sans);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--c-text-dim);
+    margin: 0 0 14px;
+  }
+
+  .sc-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+  }
+
+  .sc-tag {
+    font-family: var(--ff-sans);
+    font-size: 11.5px;
+    line-height: 1;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(98, 137, 199, 0.08);
+    color: var(--c-text-dim);
+    white-space: nowrap;
+  }
+
+  .sc-empty {
+    font-family: var(--ff-sans);
+    font-size: 12px;
+    color: var(--c-text-faint);
+    margin-top: auto;
+  }
+</style>

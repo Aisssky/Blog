@@ -1,0 +1,259 @@
+/* ==========================================================================
+   Writing 信息架构共享样式（首页 / 分区页 / 分类页 / 全部文章）
+   依赖 theme.css 的设计令牌，与 blog.css 的 post-list / post-card 协同。
+   ========================================================================== */
+
+/* ---- 一级分区卡片网格 ---- */
+.writing-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin: 0 0 40px;
+}
+
+/* ---- 两栏布局（最近更新 + 侧栏） ---- */
+.writing-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 24px;
+  align-items: start;
+}
+
+.writing-main,
+.writing-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.writing-side {
+  position: sticky;
+  top: calc(var(--header-h) + 24px);
+}
+
+/* ---- 玻璃面板 ---- */
+.writing-panel {
+  background: var(--c-glass);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+}
+
+.writing-panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.writing-panel-title {
+  font-family: var(--ff-sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--c-text);
+  margin: 0 0 14px;
+}
+
+.writing-panel-head .writing-panel-title {
+  margin-bottom: 0;
+}
+
+.writing-view-all {
+  font-family: var(--ff-sans);
+  font-size: 12px;
+  color: var(--c-accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.writing-view-all:hover {
+  color: var(--c-accent-hover);
+}
+
+/* 面板里的文章列表：轻量分隔线，不做独立卡片 */
+.writing-panel .post-list {
+  display: block;
+}
+
+.writing-panel .post-card {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 18px 2px;
+}
+
+.writing-panel .post-card + .post-card {
+  border-top: 1px solid var(--c-border-soft);
+}
+
+.writing-panel .post-card:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+/* ---- 侧栏：分区列表 ---- */
+.section-links {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.section-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-family: var(--ff-sans);
+  font-size: 13.5px;
+  color: var(--c-text);
+  text-decoration: none;
+  transition: background 0.18s ease;
+}
+
+.section-link:hover {
+  background: rgba(98, 137, 199, 0.08);
+}
+
+.section-link .count {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--c-text-faint);
+}
+
+/* ---- 侧栏：标签云 ---- */
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-chip {
+  font-family: var(--ff-sans);
+  font-size: 12px;
+  line-height: 1;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: rgba(98, 137, 199, 0.08);
+  color: var(--c-text-dim);
+  text-decoration: none;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.tag-chip:hover {
+  background: var(--c-accent);
+  color: #fff;
+}
+
+/* ---- 面包屑 ---- */
+.breadcrumb {
+  font-family: var(--ff-sans);
+  font-size: 13px;
+  color: var(--c-text-faint);
+  margin: 0 0 26px;
+}
+
+.breadcrumb a {
+  color: var(--c-text-dim);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  color: var(--c-accent-hover);
+}
+
+.breadcrumb .sep {
+  margin: 0 6px;
+  color: var(--c-text-faint);
+}
+
+.breadcrumb .current {
+  color: var(--c-text);
+}
+
+/* ---- 二级分类入口（分区页） ---- */
+.cat-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ff-sans);
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(98, 137, 199, 0.08);
+  color: var(--c-text-dim);
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.cat-chip:hover {
+  background: rgba(98, 137, 199, 0.16);
+  color: var(--c-accent-hover);
+}
+
+.cat-chip .n {
+  font-variant-numeric: tabular-nums;
+  font-size: 11.5px;
+  color: var(--c-text-faint);
+}
+
+/* ---- 返回 Writing 链接 ---- */
+.back-writing {
+  display: inline-block;
+  font-family: var(--ff-sans);
+  font-size: 13px;
+  color: var(--c-accent);
+  text-decoration: none;
+  margin-bottom: 18px;
+}
+
+.back-writing:hover {
+  color: var(--c-accent-hover);
+}
+
+/* ---- 空态 ---- */
+.writing-empty {
+  font-family: var(--ff-sans);
+  font-size: 13px;
+  color: var(--c-text-faint);
+  padding: 8px 0;
+}
+
+/* ---- 响应式 ---- */
+@media (max-width: 900px) {
+  .writing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 880px) {
+  .writing-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .writing-side {
+    position: static;
+  }
+}
+
+@media (max-width: 520px) {
+  .writing-grid {
+    grid-template-columns: 1fr;
+  }
+  .writing-panel {
+    padding: 18px 16px;
+  }
+}

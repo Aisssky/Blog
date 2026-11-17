@@ -1,0 +1,35 @@
+---
+/**
+ * 全部文章 /blog/all/
+ * Writing 首页「查看全部」的落点，按发布时间倒序列出所有已发布文章。
+ */
+import PageLayout from '../../../components/PageLayout.astro';
+import PostCard from '../../../components/PostCard.astro';
+import { getPublishedPosts } from '../../../lib/posts';
+import { withBase } from '../../../lib/site';
+import '../../../styles/writing.css';
+
+const posts = await getPublishedPosts();
+---
+
+<PageLayout
+  title="全部文章"
+  description="Aisssky 的全部技术笔记与文章"
+  subtitle={`共 ${posts.length} 篇，按发布时间倒序。`}
+>
+  <nav class="breadcrumb" aria-label="面包屑">
+    <a href={withBase('/blog/')}>Writing</a>
+    <span class="sep">/</span>
+    <span class="current">全部文章</span>
+  </nav>
+
+  {
+    posts.length > 0 ? (
+      <ul class="post-list">
+        {posts.map((post) => <PostCard post={post} />)}
+      </ul>
+    ) : (
+      <div class="empty">还没有文章。</div>
+    )
+  }
+</PageLayout>

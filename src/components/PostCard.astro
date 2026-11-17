@@ -12,9 +12,11 @@ import { postPath } from '../lib/site';
 
 interface Props {
   post: CollectionEntry<'blog'>;
+  /** 是否在元信息里显示一级分区（列表页默认开） */
+  showSection?: boolean;
 }
 
-const { post } = Astro.props;
+const { post, showSection = true } = Astro.props;
 const { title, description, cover } = post.data;
 ---
 
@@ -25,7 +27,7 @@ const { title, description, cover } = post.data;
 
   {description && <p class="desc">{description}</p>}
 
-  <PostMeta post={post} />
+  <PostMeta post={post} showSection={showSection} />
 
   {cover && <span class="sr-only">含封面图</span>}
 </li>
