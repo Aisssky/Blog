@@ -98,6 +98,26 @@ export const PATTERN_ROWS: PatternRow[] = [
     ],
   },
   {
+    id: 'p16',
+    name: '原型模式',
+    en: 'Prototype',
+    category: '创建型',
+    structure: { src: `${IMG}image-40.webp`, alt: 'Prototype 结构图' },
+    parts: ['Prototype：抽象原型类', 'ConcretePrototype：具体原型类', 'Client：客户类'],
+    examples: [
+      {
+        title: '邮件复制（浅克隆）',
+        note: '复制邮件 Email 时不复制附件 Attachment，改内容不动原件。',
+        image: `${IMG}image-8.webp`,
+      },
+      {
+        title: '深克隆',
+        note: '克隆时连同成员对象一起复制。',
+        image: `${IMG}image-28.webp`,
+      },
+    ],
+  },
+  {
     id: 'p04',
     name: '适配器模式',
     en: 'Adapter',
