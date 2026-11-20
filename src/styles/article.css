@@ -113,6 +113,12 @@
   font-weight: 600;
 }
 
+/* 目录折叠开关只给手机端用；桌面端目录始终展开 */
+.sidebar .toc-toggle,
+.sidebar .toc-toggle-label {
+  display: none;
+}
+
 .sidebar ul {
   list-style: none;
   margin: 0;
@@ -143,6 +149,15 @@
 .sidebar .sub-link {
   padding-left: 24px;
   font-size: 14px;
+}
+
+/* 深层标题的缩进随 data-depth 走，等价替换原来的内联 padding */
+.sidebar .toc-link[data-depth="4"] {
+  padding-left: 40px;
+}
+
+.sidebar .toc-link[data-depth="5"] {
+  padding-left: 56px;
 }
 
 .sidebar .nav-divider {
@@ -872,6 +887,96 @@ details.iq .iq-answer ol {
 
   .sidebar .sub-link {
     padding-left: 8px;
+  }
+
+  /* 长文目录在手机上默认收起：展开后纵向排列、限高内部滚动，避免几百条目录把正文顶走 */
+  .sidebar .toc-title {
+    display: none;
+  }
+
+  .sidebar .toc-toggle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .sidebar .toc-toggle-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px 14px;
+    margin: 0 0 10px;
+    background: #f7f9fc;
+    border: 1px solid #e6edf7;
+    border-radius: 8px;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .sidebar .toc-arrow {
+    font-size: 18px;
+    line-height: 1;
+    color: #8898ab;
+    transition: transform 0.2s;
+  }
+
+  .sidebar .toc-toggle:checked + .toc-toggle-label .toc-arrow {
+    transform: rotate(180deg);
+  }
+
+  .sidebar .toc-toggle:not(:checked) ~ .toc-list {
+    display: none;
+  }
+
+  .sidebar .toc-list {
+    display: block;
+    flex-wrap: nowrap;
+    gap: 0;
+    max-height: 60vh;
+    overflow-y: auto;
+    margin: 0 0 12px;
+    padding: 4px 0 4px 8px;
+    border-left: 2px solid #eef2f8;
+  }
+
+  .sidebar .toc-list li {
+    margin: 0;
+  }
+
+  .sidebar .toc-list a {
+    padding: 6px 10px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .sidebar .toc-list a[data-depth="2"] {
+    font-weight: 600;
+    color: #2b3a4a;
+  }
+
+  .sidebar .toc-list a.sub-link {
+    padding-left: 24px;
+    font-size: 12.5px;
+    color: #66788c;
+  }
+
+  .sidebar .toc-list a[data-depth="4"] {
+    padding-left: 38px;
+  }
+
+  .sidebar .toc-list a[data-depth="5"] {
+    padding-left: 52px;
   }
 
   .sidebar .back-link {
