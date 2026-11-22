@@ -394,11 +394,13 @@
  * 把它让给内容，并把左右内边距收紧，让矩阵尽量一屏放得下。
  * 不支持 :has() 的浏览器只是回到原来的窄栏 + 横向滚动，不影响阅读。
  */
-.main-container:has(.pattern-matrix) .right-blank {
+.main-container:has(.pattern-matrix) .right-blank,
+.main-container:has(.testing-matrix) .right-blank {
   display: none;
 }
 
-.main-container:has(.pattern-matrix) .content-area {
+.main-container:has(.pattern-matrix) .content-area,
+.main-container:has(.testing-matrix) .content-area {
   padding: 50px 44px;
 }
 
