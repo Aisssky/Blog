@@ -1,13 +1,17 @@
 ---
 /**
- * 随记列表页 /notes/
+ * 随记列表页 /notes/ —— 整页内容加密，输入密码后才显示。
  *
- * 与 /blog/（Writing）同一套外壳和排版，但记录的是**游戏开发之外**的东西。
- * 没有单篇详情页——随记就在这一页读完，正文直接渲染出来。
+ * 构建时把列表渲染成 HTML 并用 AES-GCM 加密，页面里只留密文和解锁 UI；
+ * 前端 WebCrypto 用输入的密码解密后注入 DOM。密码错则校验失败，拿不到明文。
+ * 注意：这是前端锁，只挡「不查源码」的普通访客，不是真正的访问控制。
  */
 import PageLayout from '../../components/PageLayout.astro';
+import NotesListContent from '../../components/NotesListContent.astro';
 import { getCollection, render } from 'astro:content';
-import { formatDate, withBase } from '../../lib/site';
+import { experimental_AstroContainer as AstroContainer } from 'astro/container';
+import { encryptNotes } from '../../lib/notes-crypto';
+import { NOTES_PASSCODE } from '../../lib/notes-passcode';
 
 const notes = (await getCollection('notes', ({ data }) => !data.draft)).sort(
   // 时间正序：早的在上、新的在下（新增随记追加到列表末尾）
@@ -17,55 +21,83 @@ const notes = (await getCollection('notes', ({ data }) => !data.draft)).sort(
 const rendered = await Promise.all(
   notes.map(async (note) => ({ note, Content: (await render(note)).Content })),
 );
+
+// 用容器把列表组件渲染成 HTML 字符串，再整体加密
+const container = await AstroContainer.create();
+const listHtml = await container.renderToString(NotesListContent, { props: { rendered } });
+const cipher = encryptNotes(listHtml, NOTES_PASSCODE);
 ---
 
 <PageLayout title="随记" description="游戏开发之外的随手记录">
   <div class="page-glass">
-    {
-      rendered.length > 0 ? (
-          <ul class="note-list">
-          {rendered.map(({ note, Content }) => {
-            const cover = note.data.cover;
-            const link = note.data.link;
-            return (
-              <li class={`note-item${cover ? ' note-item--work' : ''}`} id={note.id}>
-                {cover && (
-                  <div class="note-cover">
-                    {link ? (
-                      <a href={link} target="_blank" rel="noopener">
-                        <img src={withBase(cover)} alt={note.data.title ?? 'cover'} loading="lazy" />
-                      </a>
-                    ) : (
-                      <img src={withBase(cover)} alt={note.data.title ?? 'cover'} loading="lazy" />
-                    )}
-                  </div>
-                )}
-                <div class="note-main">
-                  <p class="note-date">{formatDate(note.data.date)}</p>
-                  {note.data.title && <h2 class="note-title">{note.data.title}</h2>}
-                  <div class="note-body">
-                    <Content />
-                  </div>
-                  {link && (
-                    <a class="note-link" href={link} target="_blank" rel="noopener">查看 ↗</a>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <div class="empty">
-          还没有随记。往 <code>src/content/notes/</code> 里放一个 <code>.md</code>
-          文件（frontmatter 写 <code>date</code>），或者打开 <code>/admin/</code> 新建。
-        </div>
-      )
-    }
+    <div id="notes-lock" class="notes-lock" data-cipher={cipher}>
+      <div class="lock-icon" aria-hidden="true">🔒</div>
+      <h1 class="lock-title">随记已加密</h1>
+      <p class="lock-hint">输入密码查看内容。</p>
+      <form id="notes-lock-form" class="lock-form" autocomplete="off">
+        <input
+          id="notes-pass-input"
+          class="lock-input"
+          type="password"
+          name="passcode"
+          placeholder="密码"
+          aria-label="随记访问密码"
+          autocomplete="current-password"
+          required
+        />
+        <button class="lock-btn" type="submit">解锁</button>
+      </form>
+      <p id="notes-lock-error" class="lock-error" role="alert" hidden>密码不对，再试试。</p>
+    </div>
+    <div id="notes-vault" class="notes-vault" hidden></div>
   </div>
 </PageLayout>
 
-<style>
-  /* 和 /blog/ 首页同款玻璃面板 */
+<script is:inline define:vars={{}}>
+  (async () => {
+    const lock = document.getElementById('notes-lock');
+    const vault = document.getElementById('notes-vault');
+    const form = document.getElementById('notes-lock-form');
+    const input = document.getElementById('notes-pass-input');
+    const error = document.getElementById('notes-lock-error');
+    if (!lock || !vault || !form || !input || !error) return;
+
+    const b64 = lock.dataset.cipher || '';
+    const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    const iv = bytes.slice(0, 12);
+    const ciphertext = bytes.slice(12);
+
+    async function tryUnlock(pass) {
+      try {
+        const keyBytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
+        const key = await crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['decrypt']);
+        const plain = await crypto.subtle.decrypt(
+          { name: 'AES-GCM', iv, tagLength: 128 },
+          key,
+          ciphertext,
+        );
+        vault.innerHTML = new TextDecoder().decode(plain);
+        lock.hidden = true;
+        vault.hidden = false;
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const ok = await tryUnlock(input.value);
+      error.hidden = ok;
+      if (!ok) {
+        input.select();
+      }
+    });
+  })();
+</script>
+
+<style is:global>
+  /* 玻璃面板 */
   .page-glass {
     background: var(--c-glass);
     backdrop-filter: blur(18px) saturate(120%);
@@ -75,6 +107,79 @@ const rendered = await Promise.all(
     padding: 26px 28px;
   }
 
+  /* 解锁界面 */
+  .notes-lock {
+    text-align: center;
+    padding: 48px 16px 56px;
+  }
+
+  .lock-icon {
+    font-size: 34px;
+    line-height: 1;
+    margin-bottom: 14px;
+  }
+
+  .lock-title {
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #222;
+  }
+
+  .lock-hint {
+    margin: 0 0 24px;
+    font-size: 14px;
+    color: #777;
+  }
+
+  .lock-form {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .lock-input {
+    width: 220px;
+    max-width: 100%;
+    padding: 10px 14px;
+    font-family: var(--ff-sans);
+    font-size: 14px;
+    color: #333;
+    background: #fff;
+    border: 1px solid var(--c-border, #d9e2ee);
+    border-radius: 999px;
+    outline: none;
+    transition: border-color 0.18s ease;
+  }
+
+  .lock-input:focus {
+    border-color: var(--c-accent, #6289c7);
+  }
+
+  .lock-btn {
+    padding: 10px 24px;
+    font-family: var(--ff-sans);
+    font-size: 14px;
+    color: #fff;
+    background: var(--c-accent, #6289c7);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: opacity 0.18s ease;
+  }
+
+  .lock-btn:hover {
+    opacity: 0.9;
+  }
+
+  .lock-error {
+    margin: 14px 0 0;
+    font-size: 13px;
+    color: #c2185b;
+  }
+
+  /* 随记列表（由前端解密后注入，故用全局样式） */
   .note-list {
     margin: 0;
     padding: 0;
@@ -84,7 +189,6 @@ const rendered = await Promise.all(
   .note-item {
     padding: 18px 4px;
     border-top: 1px solid var(--c-border-soft);
-    /* 站内锚点跳转时给吸顶导航留出余量 */
     scroll-margin-top: 80px;
   }
 
@@ -93,7 +197,6 @@ const rendered = await Promise.all(
     padding-top: 4px;
   }
 
-  /* 带封面 / 外链的作品卡片 */
   .note-item--work {
     display: grid;
     grid-template-columns: 200px 1fr;
@@ -154,11 +257,11 @@ const rendered = await Promise.all(
     color: #333;
   }
 
-  .note-body :global(p) {
+  .note-body p {
     margin: 0 0 8px;
   }
 
-  .note-body :global(p:last-child) {
+  .note-body p:last-child {
     margin-bottom: 0;
   }
 

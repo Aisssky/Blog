@@ -1,0 +1,57 @@
+---
+/**
+ * /notes/ 的正文列表，单独抽出来供构建时渲染成 HTML 字符串再加密。
+ * 样式在 notes/index.astro 里以 is:global 提供（本组件渲染结果会被 innerHTML 注入）。
+ */
+import { formatDate, withBase } from '../lib/site';
+
+interface Props {
+  rendered: {
+    note: import('astro:content').CollectionEntry<'notes'>;
+    Content: import('astro:content').RenderComponent;
+  }[];
+}
+
+const { rendered } = Astro.props;
+---
+
+{
+  rendered.length > 0 ? (
+    <ul class="note-list">
+      {rendered.map(({ note, Content }) => {
+        const cover = note.data.cover;
+        const link = note.data.link;
+        return (
+          <li class={`note-item${cover ? ' note-item--work' : ''}`} id={note.id}>
+            {cover && (
+              <div class="note-cover">
+                {link ? (
+                  <a href={link} target="_blank" rel="noopener noreferrer">
+                    <img src={withBase(cover)} alt={note.data.title ?? 'cover'} loading="lazy" />
+                  </a>
+                ) : (
+                  <img src={withBase(cover)} alt={note.data.title ?? 'cover'} loading="lazy" />
+                )}
+              </div>
+            )}
+            <div class="note-main">
+              <p class="note-date">{formatDate(note.data.date)}</p>
+              {note.data.title && <h2 class="note-title">{note.data.title}</h2>}
+              <div class="note-body">
+                <Content />
+              </div>
+              {link && (
+                <a class="note-link" href={link} target="_blank" rel="noopener noreferrer">查看 ↗</a>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  ) : (
+    <div class="empty">
+      还没有随记。往 <code>src/content/notes/</code> 里放一个 <code>.md</code>
+      文件（frontmatter 写 <code>date</code>），或者打开 <code>/admin/</code> 新建。
+    </div>
+  )
+}
