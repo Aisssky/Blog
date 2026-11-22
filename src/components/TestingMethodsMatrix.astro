@@ -10,14 +10,18 @@ import { TESTING_TABLES, rich } from '../data/testing-methods-matrix';
 
 <div class="testing-matrix">
   {
-    TESTING_TABLES.map((table) => (
+    TESTING_TABLES.map((table) => {
+      // fr 列宽换算成百分比，交给原生 table 的 colgroup
+      const frs = table.columns.map((c) => parseFloat(c.width));
+      const total = frs.reduce((a, b) => a + b, 0);
+      return (
       <section class="tm-section" id={table.id}>
         <h2 class="tm-title">{table.title}</h2>
         <div class="tm-scroll">
-          <table
-            class="tm-table"
-            style={`grid-template-columns: ${table.columns.map((c) => c.width).join(' ')}`}
-          >
+          <table class="tm-table">
+            <colgroup>
+              {frs.map((f) => <col style={`width:${(f / total * 100).toFixed(2)}%`} />)}
+            </colgroup>
             <thead>
               {table.columns.map((col) => (
                 <th scope="col">{col.name}</th>
@@ -41,7 +45,8 @@ import { TESTING_TABLES, rich } from '../data/testing-methods-matrix';
           </table>
         </div>
       </section>
-    ))
+      );
+    })
   }
 </div>
 
@@ -70,27 +75,15 @@ import { TESTING_TABLES, rich } from '../data/testing-methods-matrix';
     background: #fff;
   }
 
-  /* 正文 .content-area table 是 display:block + 自身滚动，这里还原成表格 */
+  /* 原生 table 布局：列宽交给 colgroup 百分比，长文本自动换行，宽度受控 */
   .tm-table {
-    display: grid !important;
-    width: max-content;
-    min-width: 100%;
+    display: table !important;
+    width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     margin: 0 !important;
     font-size: 13.5px;
     overflow: visible !important;
-  }
-
-  .tm-table thead {
-    display: contents;
-  }
-
-  .tm-table tbody {
-    display: contents;
-  }
-
-  .tm-table tr {
-    display: contents;
   }
 
   .tm-table th,
@@ -105,7 +98,8 @@ import { TESTING_TABLES, rich } from '../data/testing-methods-matrix';
     font-size: 13.5px;
     line-height: 1.75;
     color: #444;
-    min-width: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   .tm-table th:last-child,
@@ -148,6 +142,26 @@ import { TESTING_TABLES, rich } from '../data/testing-methods-matrix';
   .tm-table :global(strong) {
     color: #222;
     font-weight: 700;
+  }
+
+  /* 长文本拆成的分条短行 */
+  .tm-table :global(.tm-line) {
+    margin: 0 0 7px;
+  }
+
+  .tm-table :global(.tm-line:last-child) {
+    margin-bottom: 0;
+  }
+
+  /* 编号项：编号悬挂，正文对齐 */
+  .tm-table :global(.tm-num) {
+    padding-left: 1.6em;
+    text-indent: -1.6em;
+  }
+
+  /* 实例标题：与上文拉开一点距离 */
+  .tm-table :global(.tm-eg) {
+    margin-top: 10px;
   }
 
   /* 窄屏：表格退成纵向卡片 */

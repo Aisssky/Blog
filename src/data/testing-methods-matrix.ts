@@ -14,7 +14,11 @@ export interface FactTable {
   rows: string[][];
 }
 
-/** 原文里的 ** 强调还原成 <strong>；\< \> 等导出转义还原成实体 */
+/**
+ * 原文里的 ** 强调还原成 <strong>；\< \> 等导出转义还原成实体。
+ * 换行拆成分条短行（tm-line），编号项悬挂缩进，实例标题单独成行——
+ * 逐字保留原文，只把「一坨文字」变成一条一行的短行。
+ */
 export function rich(s: string): string {
   let out = s
     .replace(/\\</g, '&lt;')
@@ -25,7 +29,21 @@ export function rich(s: string): string {
     bold = !bold;
     return bold ? '<strong>' : '</strong>';
   });
-  return out.replace(/\n/g, '<br>');
+  const lines = out.split('\n').map((l) => l.trim()).filter(Boolean);
+  if (lines.length === 0) return out;
+  return lines
+    .map((line) => {
+      // 编号列表 / 步骤 → 缩进条目，编号悬挂
+      if (/^(步骤)?\d+[\.、：:]/.test(line) || /^（\d+）/.test(line)) {
+        return `<div class="tm-line tm-num">${line}</div>`;
+      }
+      // 实例小标题 → 单独一行，突出
+      if (/^<strong>实例/.test(line)) {
+        return `<div class="tm-line tm-eg">${line}</div>`;
+      }
+      return `<div class="tm-line">${line}</div>`;
+    })
+    .join('');
 }
 
 export const TESTING_TABLES: FactTable[] = [
